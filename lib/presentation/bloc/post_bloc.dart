@@ -1,27 +1,35 @@
 import 'package:bloc/bloc.dart';
+import 'package:clean_arch/di/injection_container.dart';
 import 'package:equatable/equatable.dart';
-import 'package:clean_arch/core/usecases/usecase.dart'; // Correct import
-import 'package:clean_arch/domain/entities/post.dart'; // Correct import
-import '../../domain/usecases/get_posts.dart';
-import '../../core/error/failures.dart'; // Correct import
+import 'package:clean_arch/core/usecases/usecase.dart';
+import 'package:clean_arch/domain/entities/post.dart';
+import 'package:injectable/injectable.dart'; // <-- Import injectable
+import '../../domain/usecases/get_posts_use_case.dart';
+import '../../core/error/failures.dart';
 
 part 'post_event.dart';
 part 'post_state.dart';
 
 const String SERVER_FAILURE_MESSAGE = 'Server Failure';
 const String CACHE_FAILURE_MESSAGE = 'Cache Failure';
-const String NETWORK_FAILURE_MESSAGE = 'Network Failure'; // Added
+const String NETWORK_FAILURE_MESSAGE = 'Network Failure';
 
+@injectable // <-- Add this annotation
 class PostBloc extends Bloc<PostEvent, PostState> {
-  final GetPosts getPosts;
+  // You can remove this line now, as injectable will handle injecting it via the constructor
+  // final GetPostsUseCase getPosts = getIt<GetPostsUseCase>();
 
-  PostBloc({required this.getPosts}) : super(PostInitial()) {
+  final GetPostsUseCase _getPosts; // Make it private
+
+  // Modify the constructor to accept the dependency
+  PostBloc(this._getPosts) : super(PostInitial()) {
     on<FetchPosts>((event, emit) async {
       emit(PostLoading());
-      final failureOrPosts = await getPosts(NoParams());
+      // Use the injected use case
+      final failureOrPosts = await _getPosts(NoParams());
       failureOrPosts.fold(
-        (failure) => emit(PostError(message: _mapFailureToMessage(failure))),
-        (posts) => emit(PostLoaded(posts: posts)),
+            (failure) => emit(PostError(message: _mapFailureToMessage(failure))),
+            (posts) => emit(PostLoaded(posts: posts)),
       );
     });
   }
@@ -32,10 +40,10 @@ class PostBloc extends Bloc<PostEvent, PostState> {
         return SERVER_FAILURE_MESSAGE;
       case CacheFailure:
         return CACHE_FAILURE_MESSAGE;
-      case NetworkFailure: // Added
+      case NetworkFailure:
         return NETWORK_FAILURE_MESSAGE;
       default:
         return 'Unexpected Error';
     }
   }
-} 
+}

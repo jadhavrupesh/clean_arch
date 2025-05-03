@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../injection_container.dart';
+import '../../di/injection_container.dart';
 import '../bloc/post_bloc.dart';
 import '../widgets/posts_list_widget.dart'; // We'll create this next
 import '../widgets/loading_widget.dart'; // We'll create this next
@@ -16,7 +16,7 @@ class PostsPage extends StatelessWidget {
         title: const Text('Posts'),
       ),
       body: BlocProvider(
-        create: (_) => sl<PostBloc>()..add(FetchPosts()), // Request initial data fetch
+        create: (_) => getIt<PostBloc>()..add(FetchPosts()), // Request initial data fetch
         child: BlocBuilder<PostBloc, PostState>(
           builder: (context, state) {
             if (state is PostInitial) {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'presentation/pages/posts_page.dart';
-import 'injection_container.dart' as di; // Dependency injection
+import 'di/injection_container.dart' as di; // Dependency injection
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Important!
-  await di.init(); // Initialize dependency injection
+  await di.configureDependencies('dev'); // Initialize dependency injection
   runApp(const MyApp());
 }
 
