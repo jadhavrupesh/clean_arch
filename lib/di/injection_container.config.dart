@@ -9,6 +9,9 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:clean_arch/core/network/error_interceptor.dart' as _i815;
+import 'package:clean_arch/core/network/header_interceptor.dart' as _i371;
+import 'package:clean_arch/core/network/network_config.dart' as _i829;
 import 'package:clean_arch/data/datasources/remote/api_service.dart' as _i59;
 import 'package:clean_arch/data/repositories/post_repository_impl.dart'
     as _i399;
@@ -28,7 +31,15 @@ extension GetItInjectableX on _i174.GetIt {
   }) {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final registerModule = _$RegisterModule();
-    gh.lazySingleton<_i361.Dio>(() => registerModule.dio);
+    gh.factory<_i829.NetworkConfig>(() => _i829.NetworkConfig());
+    gh.factory<_i371.HeaderInterceptor>(() => _i371.HeaderInterceptor());
+    gh.factory<_i815.ErrorInterceptor>(() => _i815.ErrorInterceptor());
+    gh.lazySingleton<_i361.Dio>(
+      () => registerModule.dio(
+        gh<_i371.HeaderInterceptor>(),
+        gh<_i815.ErrorInterceptor>(),
+      ),
+    );
     gh.factory<_i59.ApiService>(() => _i59.ApiService(gh<_i361.Dio>()));
     gh.factory<_i758.PostRepository>(
       () => _i399.PostRepositoryImpl(remoteDataSource: gh<_i59.ApiService>()),
